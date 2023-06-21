@@ -1,0 +1,121 @@
+diff --git a/node_modules/react-native-calendars/src/MyContext.js b/node_modules/react-native-calendars/src/MyContext.js
+new file mode 100644
+index 0000000..33393f0
+--- /dev/null
++++ b/node_modules/react-native-calendars/src/MyContext.js
+@@ -0,0 +1,14 @@
++import React, { createContext } from 'react';
++
++export const SelectContext = createContext({
++    selectDate: {
++        year: 0,
++        month: 0,
++        selectedDay: 0,
++        selectedDate: '',
++        selectedTime: '',
++        selectedPostTime: '',
++    },
++
++    setSelectDate: () => {}
++});
+\ No newline at end of file
+diff --git a/node_modules/react-native-calendars/src/expandableCalendar/Context/index.d.ts b/node_modules/react-native-calendars/src/expandableCalendar/Context/index.d.ts
+index 01d3731..4375d4a 100644
+--- a/node_modules/react-native-calendars/src/expandableCalendar/Context/index.d.ts
++++ b/node_modules/react-native-calendars/src/expandableCalendar/Context/index.d.ts
+@@ -9,5 +9,12 @@ export interface CalendarContextProps {
+     numberOfDays?: number;
+     timelineLeftInset?: number;
+ }
++export interface SelectContextProps {
++    
++    year: number;
++}
+ declare const CalendarContext: React.Context<CalendarContextProps>;
++declare const SelectContext: React.Context<SelectContextProps>;
++
+ export default CalendarContext;
++export { SelectContext };
+\ No newline at end of file
+diff --git a/node_modules/react-native-calendars/src/expandableCalendar/Context/index.js b/node_modules/react-native-calendars/src/expandableCalendar/Context/index.js
+index e981661..e0a918b 100644
+--- a/node_modules/react-native-calendars/src/expandableCalendar/Context/index.js
++++ b/node_modules/react-native-calendars/src/expandableCalendar/Context/index.js
+@@ -1,4 +1,13 @@
+-import React from 'react';
++import React, { createContext } from 'react';
+ // @ts-expect-error
+-const CalendarContext = React.createContext({});
++const CalendarContext = createContext({});
++
+ export default CalendarContext;
++
++
++export const SelectContext = createContext({
++    year: 2023
++});
++
++
++//export { SelectContext };
+\ No newline at end of file
+diff --git a/node_modules/react-native-calendars/src/expandableCalendar/WeekCalendar/index.js b/node_modules/react-native-calendars/src/expandableCalendar/WeekCalendar/index.js
+index acc5d13..16026d3 100644
+--- a/node_modules/react-native-calendars/src/expandableCalendar/WeekCalendar/index.js
++++ b/node_modules/react-native-calendars/src/expandableCalendar/WeekCalendar/index.js
+@@ -11,6 +11,8 @@ import constants from '../../commons/constants';
+ import { extractCalendarProps } from '../../componentUpdater';
+ import CalendarContext from '../Context';
+ import { useDidUpdate } from '../../hooks';
++import {SelectContext} from '../../expandableCalendar/Context';
++
+ export const NUMBER_OF_PAGES = 6;
+ const NUM_OF_ITEMS = NUMBER_OF_PAGES * 2 + 1; // NUMBER_OF_PAGES before + NUMBER_OF_PAGES after + current
+ const APPLY_ANDROID_FIX = constants.isAndroid && constants.isRTL;
+@@ -22,6 +24,8 @@ const APPLY_ANDROID_FIX = constants.isAndroid && constants.isRTL;
+ const WeekCalendar = (props) => {
+     const { calendarWidth, hideDayNames, current, theme, testID, markedDates, } = props;
+     const context = useContext(CalendarContext);
++    const sel = useContext(SelectContext);
++    var { year } = sel;
+     const { allowShadow = true, ...calendarListProps } = props;
+     const { style: propsStyle, onDayPress, firstDay = 0, ...others } = extractCalendarProps(calendarListProps);
+     const { date, numberOfDays, updateSource, setDate, timelineLeftInset } = context;
+@@ -64,10 +68,38 @@ const WeekCalendar = (props) => {
+         return calendarWidth ?? constants.screenWidth;
+     }, [calendarWidth]);
+     const _onDayPress = useCallback((value) => {
++        console.log('onDayPress callback function called.');
++
++
++        var tempstr = "";
++
++        
++        if(value.dateString.substring(8,9) == "0") {
++            tempstr = value.dateString.substring(9,10);
++        } else { 
++            tempstr = value.dateString.substring(8,10);
++        }
++
++
++        const clickedYear = parseInt(tempstr);
++
++
++        
++
++        sel.year = clickedYear;
++        
++        console.log(sel.year);
++        
++        
++
+         if (onDayPress) {
++            
++            console.log(value.dateString);
+             onDayPress(value);
+         }
+         else {
++            
++            console.log(value.dateString);
+             setDate?.(value.dateString, UpdateSources.DAY_PRESS);
+         }
+     }, [onDayPress]);
